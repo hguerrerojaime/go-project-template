@@ -27,5 +27,4 @@ go.work
 Thumbs.db
 
 # Editor / IDE files
-.vscode/
 .idea/
