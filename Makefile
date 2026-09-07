@@ -1,4 +1,4 @@
-.PHONY: help test fmt vet install-deps docker-setup docker-down setup down clean
+.PHONY: help test fmt vet install-deps docker-setup docker-down setup down clean init docker-init
 
 # Labels for help output:
 #   [host]      - Run from the host machine (outside the dev container)
@@ -89,6 +89,10 @@ docker-install-deps: docker-setup
 docker-swagger-gen: docker-setup
 	docker compose exec app make swagger-gen
 
+## docker-init [host]: Rename the module path inside the dev container (usage: make docker-init MODULE=github.com/you/project)
+docker-init: docker-setup
+	docker compose exec app make init MODULE=$(MODULE)
+
 ## ── Build & test (inside container) ─────────────────────────────────────────
 
 ## test [container]: Run all tests
@@ -120,6 +124,21 @@ install-deps: HOST_ALT = docker-install-deps
 install-deps:
 	$(REQUIRE_CONTAINER)
 	go mod download
+
+## init [container]: Rename the module path (usage: make init MODULE=github.com/you/project)
+init: HOST_ALT = docker-init MODULE=github.com/you/project
+init:
+	$(REQUIRE_CONTAINER)
+	@if [ -z "$(MODULE)" ]; then \
+		echo "Error: MODULE is required, e.g. make init MODULE=github.com/you/project"; \
+		exit 1; \
+	fi
+	@OLD=$$(go list -m); \
+	grep -rl "$$OLD" --include='*.go' . | xargs -r sed -i.bak "s#$$OLD#$(MODULE)#g"; \
+	find . -name '*.bak' -delete
+	go mod edit -module $(MODULE)
+	go mod tidy
+	@echo "Module renamed to $(MODULE)"
 
 ## ── Run (inside container) ───────────────────────────────────────────────────
 

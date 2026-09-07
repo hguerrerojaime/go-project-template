@@ -1,6 +1,18 @@
-# API Service (Go)
+# Go Project Template
 
-Basic development setup for this project using VS Code, Dev Containers, and Docker Compose.
+A starting point for Go services, with development handled entirely through VS Code, Dev Containers, and Docker Compose — no local Go install required.
+
+## Using This Template
+
+1. Click **Use this template** on GitHub (or `gh repo create <name> --template hguerrerojaime/go-project-template`).
+2. Follow **Quick Start** below to get the dev container running.
+3. Rename the module path to match your new repo:
+
+   ```bash
+   make docker-init MODULE=github.com/you/your-repo
+   ```
+
+   (or `make init MODULE=...` if you're already inside the container)
 
 ## Prerequisites
 
@@ -68,6 +80,7 @@ Host (outside container):
 - `make docker-vet` - vet in container
 - `make docker-install-deps` - download dependencies in container
 - `make docker-swagger-gen` - run swagger generation in container
+- `make docker-init MODULE=...` - rename the module path in container
 
 Container (inside dev container):
 
@@ -77,6 +90,7 @@ Container (inside dev container):
 - `make vet`
 - `make install-deps`
 - `make run-api` (live reload via `air`)
+- `make init MODULE=...` (rename the module path)
 
 Show all commands:
 
@@ -84,22 +98,9 @@ Show all commands:
 make help
 ```
 
-## Go Modules (`go.mod`)
-
-If this repository does not have a `go.mod` yet, initialize it from project root:
-
-```bash
-go mod init github.com/<your-org-or-user>/<repo-name>
-go mod tidy
-```
-
-Then download dependencies:
-
-```bash
-make install-deps
-```
-
 ## Notes
 
 - The container sets `INSIDE_DEV_CONTAINER=true`, and some `make` targets enforce this.
 - Port `8080` is forwarded by Docker Compose and Dev Container settings.
+- CI (`.github/workflows/ci.yml`) runs `go vet`, `go test`, and a build on every push/PR to `main`.
+- Licensed under [MIT](LICENSE).
